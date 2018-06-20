@@ -1,7 +1,7 @@
 <template>
     <section id="silentbox-group">
         <slot></slot>
-        <silentbox-overlay></silentbox-overlay>
+        <silentbox-overlay :moving="moving" />
     </section>
 </template>
 
@@ -10,6 +10,9 @@
 
     export default {
         name: 'SilentboxGroup',
+        props: {
+            transitionDuration: { type: Number, default: 200 }
+        },
         data() {
             return {
                 overlayVisibility: false,
@@ -20,6 +23,7 @@
                     list: []
                 },
                 autoplay: false,
+                moving: false,
                 description: ''
             }
         },
@@ -29,6 +33,7 @@
         methods: {
             // Open next item in the queue
             nextItem() {
+                this.moving = true
                 let item = this.$children[this.items.position + 1].$options._componentTag;
 
                 if (this.items.position !== (this.items.total - 1)) {
@@ -44,9 +49,12 @@
 
                 this.description = (this.$children[this.items.position].description !== undefined)
                     ? this.$children[this.items.position].description : false;
+
+                setTimeout(() => { this.moving = false }, this.transitionDuration)
             },
             // Open previous item in the queue
             prevItem() {
+                this.moving = true
                 let item = this.$children[this.items.position].$options._componentTag;
 
                 if (this.items.position !== 0) {
@@ -62,16 +70,20 @@
 
                 this.description = (this.$children[this.items.position].description !== undefined)
                     ? this.$children[this.items.position].description : false;
+
+                setTimeout(() => { this.moving = false }, this.transitionDuration)
             }
         },
         created() {
             this.$on('closeSilentboxOverlay', () => {
                 this.overlayVisibility = false;
+                this.$emit('changedVisibility', this.overlayVisibility)
             });
             this.$on('openSilentboxOverlay', item => {
                 this.embedUrl = item.url;
                 this.items.position = item.position;
                 this.overlayVisibility = true;
+                this.$emit('changedVisibility', this.overlayVisibility)
                 this.autoplay = item.autoplay;
                 this.description = item.description;
             });
@@ -79,6 +91,7 @@
             window.addEventListener('keyup', (event) => {
                 if (event.which === 27) {
                     this.overlayVisibility = false;
+                    this.$emit('changedVisibility', this.overlayVisibility)
                 }
                 if (event.which === 39) {
                     this.nextItem();
