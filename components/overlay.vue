@@ -4,7 +4,7 @@
 
         <div id="silentbox-overlay__content" @click.stop="closeSilentboxOverlay">
             <div id="silentbox-overlay__embed">
-                <div id="silentbox-overlay__container">
+                <div id="silentbox-overlay__container" :class="{'moving': moving}">
                     <iframe width="100%" height="100%" v-if="video" :src="getEmbedUrl" frameborder="0" allowfullscreen></iframe>
                     <img width="auto" height="auto" :src="getEmbedUrl" v-if="! video">
                 </div>
@@ -26,6 +26,9 @@
 <script>
     export default {
         name: 'SilentboxOverlay',
+        props: {
+            moving: { type: Boolean, default: false }
+        },
         data() {
             return {
                 video: false
